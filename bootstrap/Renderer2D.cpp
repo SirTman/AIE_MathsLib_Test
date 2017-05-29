@@ -5,7 +5,6 @@
 #include "Font.h"
 #include <glm/ext.hpp>
 #include <stb_truetype.h>
-
 namespace aie {
 
 Renderer2D::Renderer2D() {

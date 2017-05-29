@@ -95,6 +95,9 @@
   <ItemGroup>
     <ClInclude Include="Application2D.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\MathLib.lib" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
