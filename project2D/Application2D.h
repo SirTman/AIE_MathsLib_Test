@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "Renderer2D.h"
 #include "Audio.h"
+#include "Vector2.h"
 
 class Application2D : public aie::Application {
 public:
