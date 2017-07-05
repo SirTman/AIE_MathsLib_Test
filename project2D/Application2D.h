@@ -34,11 +34,15 @@ protected:
 
 	aie::Texture*		m_tankTexture;
 	aie::Texture*		m_tankBATexture;
-	Matrix3<float>      m_tankMatrix;
+	aie::Texture*		m_tankBoxerTexture;
 
-	float m_tankspeed;
+	Matrix3<float>      m_tankMatrix; //Tank
+	Matrix3<float>      m_tankBMatrix; //Barrel
+	Matrix3<float>      m_tankBoxerMatrix; //Boxer
 
 	float m_cameraX, m_cameraY;
-	float m_tankX, m_tankY, m_tankR;
+	float m_tankX, m_tankY, m_tankR, m_tankspeed; //tank
+	float m_tankBarrelX, m_tankBarrelY, m_tankBarrelR; //Barrel
+	float m_tankBoxerX, m_tankBoxerY, m_tankBoxerR; //Boxer
 	float m_timer;
 };

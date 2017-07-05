@@ -29,19 +29,31 @@ bool Application2D::startup() {
 
 	m_tankBATexture = new aie::Texture("./textures/barrelGreen.png");
 	m_tankTexture = new aie::Texture("./textures/tankGreen.png");
+	m_tankBoxerTexture = new aie::Texture("./textures/rock_small.png");
 
 	m_font = new aie::Font("./font/consolas.ttf", 32);
 	m_audio = new aie::Audio("./audio/powerup.wav");
 
 	m_cameraX = 0;
 	m_cameraY = 0;
+	///Tank-Start
+	//Tank
+	m_tankX = 200;		//X
+	m_tankY = 200;		//Y
+	m_tankspeed = 2.0f; //Speed
+	m_tankR = 0;        //Rotation
 	
-	m_tankX = 200;
-	m_tankY = 200;
-	
-	m_tankspeed = 2.0f;
+	//Barrel
+	m_tankBarrelX = 0;  //X
+	m_tankBarrelY = 0; //Y 40
+	m_tankBarrelR = 0;  //Rotation
 
-	m_tankR = 0;
+	//Boxer
+	m_tankBoxerX = 0;  //X
+	m_tankBoxerY = m_tankBarrelY + 70; //Y
+	m_tankBoxerR = 0;  //Rotation
+
+	///Tank-End
 	m_timer = 0;
 
 
@@ -64,61 +76,97 @@ void Application2D::shutdown() {
 
 void Application2D::update(float deltaTime) {
 
-	
+	//###TANK###
 	Matrix3<float> translation;
 	Matrix3<float> roatation;
 	translation.m31 = m_tankX;
 	translation.m32 = m_tankY;
+	
 	roatation.setRotateZ(m_tankR);
 	m_tankMatrix = translation * roatation;
+	
+	//##Barrel##
+	Matrix3<float> translation_barrel;
+	Matrix3<float> roatation_barrel;
+	Matrix3<float> child;
+	translation_barrel.m31 = m_tankBarrelX;
+	translation_barrel.m32 = m_tankBarrelY;
+
+	child = translation_barrel;// *roatation_barrel;
+	child.setRotateZ(m_tankBarrelR);
+
+	m_tankBMatrix = m_tankMatrix * child;
+
+	//##Boxer##
+	Matrix3<float> translation_boxer;
+	Matrix3<float> roatation_boxer;
+	Matrix3<float> child_of_child;
+	translation_boxer.m31 = m_tankBoxerX;
+	translation_boxer.m32 = m_tankBoxerY;
+	
+	child_of_child = translation_boxer;
+	child_of_child.setRotateZ(m_tankBoxerR);
+
+	m_tankBoxerMatrix = m_tankMatrix * child * child_of_child;
+	
 	m_timer += deltaTime;
 
-	// input example
-	aie::Input* input = aie::Input::getInstance();
-
-	// use arrow keys to move camera
-	if (input->isKeyDown(aie::INPUT_KEY_UP))
+	
+	
+	//Tank Controls ###############################################	
+	aie::Input* input = aie::Input::getInstance(); // initzlier
+	if (input->isKeyDown(aie::INPUT_KEY_KP_8)) //Forward
 	{
 		m_tankY += roatation.m11 * m_tankspeed;
 		m_tankX -= roatation.m12 * m_tankspeed;
-		//m_tankMatrix.m32 = m_tankY;
 	}
-	if (input->isKeyDown(aie::INPUT_KEY_DOWN)) 
+	if (input->isKeyDown(aie::INPUT_KEY_KP_5)) //Backward
 	{
 		m_tankY -= roatation.m11 * m_tankspeed;
 		m_tankX += roatation.m12 * m_tankspeed;
-		//m_tankMatrix.m32 = m_tankY;
 	}
 
-	if (input->isKeyDown(aie::INPUT_KEY_LEFT)) 
+	if (input->isKeyDown(aie::INPUT_KEY_KP_4)) //Rotate Left
 	{
 		m_tankR -= 0.1f;
-		//m_tankMatrix = m_tankMatrixP * m_tankMatrixR;
-		//m_tankMatrix.setRotateZ(m_tankR);
 	}
-		
 
-	if (input->isKeyDown(aie::INPUT_KEY_RIGHT)) 
+	if (input->isKeyDown(aie::INPUT_KEY_KP_6)) //Rotate Right
 	{
-		
 		m_tankR += 0.1f;
-		//m_tankMatrix = m_tankMatrixP * m_tankMatrixR;
-		//m_tankMatrix.setRotateZ(m_tankR);
 	}
-		
-
-	// example of audio
-	if (input->wasKeyPressed(aie::INPUT_KEY_SPACE))
+	//Barrel Controls #############################################	
+	if (input->isKeyDown(aie::INPUT_KEY_KP_7)) //Rotate Left
 	{
-		/*
-		std::cout << m_tankMatrix.m11 + " " + m_tankMatrix.m12 + " " + m_tankMatrix.m13 + "\n";
-		std::cout << m_tankMatrix.m21 + " " + m_tankMatrix.m22 + " " + m_tankMatrix.m23 + "\n";
-		std::cout << m_tankMatrix.m31 + " " + m_tankMatrix.m32 + " " + m_tankMatrix.m33 + "\n";
-		*/
+		m_tankBarrelR -= 0.2f;
 	}
 
-	// exit the application
-	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
+	if (input->isKeyDown(aie::INPUT_KEY_KP_9)) //Rotate Right
+	{
+		m_tankBarrelR += 0.2f;
+	}
+
+	//Fire #############################################	
+	if (input->isKeyDown(aie::INPUT_KEY_DOWN)) 
+	{
+		if (m_tankBoxerY <= m_tankY + 0.5f)
+		{
+			m_tankBarrelY += roatation_barrel.m11 + 5.0f;
+			//m_tankBarrelX -= roatation_barrel.m12 + 5.0f;
+			m_tankBoxerY += 10;
+		}
+	}
+	else
+		if (m_tankBarrelY != 0)
+		{
+			m_tankBarrelY -= roatation_barrel.m11 + 5.0f;
+			//m_tankBarrelX += roatation_barrel.m12 + 5.0f;
+				m_tankBoxerY -= 10;
+		}
+
+
+	//Other #######################################################		
+	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE)) // exit the application
 		quit();
 }
 
@@ -138,18 +186,11 @@ void Application2D::draw() {
 
 	// demonstrate spinning sprite
 	
-	//m_2dRenderer->drawSprite(m_tankBATexture, m_tankX, m_tankY, 0, 0, m_timer, 1);
-	//m_2dRenderer->drawSprite(m_tankTexture, 0, 0, m_tankX, m_tankY, m_tankR, 1);
+	//m_2dRenderer->setUVRect(0, 0, 1, 1);
+	m_2dRenderer->drawSpriteTransformed3x3(m_tankTexture, m_tankMatrix.m); //Tank
+	m_2dRenderer->drawSpriteTransformed3x3(m_tankBATexture, m_tankBMatrix.m); //Barrel
+	m_2dRenderer->drawSpriteTransformed3x3(m_tankBoxerTexture, m_tankBoxerMatrix.m); //Boxer
 	
-	m_2dRenderer->setUVRect(0, 0, 1, 1);
-	m_2dRenderer->drawSpriteTransformed3x3(m_tankTexture, m_tankMatrix.m);
-	
-
-	//m_tankMatrix.m[6] = m_tankX;
-	//m_tankMatrix.m[7] = m_tankY;
-
-	
-	//m_2dRenderer->drawSpriteTransformed3x3(m_tankBATexture, m_tankMatrix.m, 0, 0, 0, m_tankMatrix.m31, m_tankMatrix.m32);
 
 	// output some text, uses the last used colour
 	char fps[32];
