@@ -36,13 +36,12 @@ bool Application2D::startup() {
 	m_cameraX = 0;
 	m_cameraY = 0;
 	
-	m_tankX = 0;
-	m_tankY = 0;
-	//m_tankX = m_tankMatrix.m31;
-	//m_tankY = m_tankMatrix.m32;
+	m_tankX = 200;
+	m_tankY = 200;
+	
+	m_tankspeed = 2.0f;
 
 	m_tankR = 0;
-
 	m_timer = 0;
 
 
@@ -65,6 +64,13 @@ void Application2D::shutdown() {
 
 void Application2D::update(float deltaTime) {
 
+	
+	Matrix3<float> translation;
+	Matrix3<float> roatation;
+	translation.m31 = m_tankX;
+	translation.m32 = m_tankY;
+	roatation.setRotateZ(m_tankR);
+	m_tankMatrix = translation * roatation;
 	m_timer += deltaTime;
 
 	// input example
@@ -73,30 +79,31 @@ void Application2D::update(float deltaTime) {
 	// use arrow keys to move camera
 	if (input->isKeyDown(aie::INPUT_KEY_UP))
 	{
-		//m_tankY -= 0.1f;
-		m_tankY -= 0.5f;
-		m_tankMatrix.m32 = m_tankY;
+		m_tankY += roatation.m11 * m_tankspeed;
+		m_tankX -= roatation.m12 * m_tankspeed;
+		//m_tankMatrix.m32 = m_tankY;
 	}
 	if (input->isKeyDown(aie::INPUT_KEY_DOWN)) 
 	{
-		m_tankY += 0.5f;
-		m_tankMatrix.m32 = m_tankY;
+		m_tankY -= roatation.m11 * m_tankspeed;
+		m_tankX += roatation.m12 * m_tankspeed;
+		//m_tankMatrix.m32 = m_tankY;
 	}
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT)) 
 	{
-		
-		m_tankR -= 1.0f;
-		m_tankMatrix.setRotateZ(m_tankR);
+		m_tankR -= 0.1f;
+		//m_tankMatrix = m_tankMatrixP * m_tankMatrixR;
+		//m_tankMatrix.setRotateZ(m_tankR);
 	}
 		
 
 	if (input->isKeyDown(aie::INPUT_KEY_RIGHT)) 
 	{
-		m_tankR += 1.0f;
-		m_tankMatrix.setRotateZ(m_tankR);
 		
-		
+		m_tankR += 0.1f;
+		//m_tankMatrix = m_tankMatrixP * m_tankMatrixR;
+		//m_tankMatrix.setRotateZ(m_tankR);
 	}
 		
 
@@ -117,6 +124,7 @@ void Application2D::update(float deltaTime) {
 
 void Application2D::draw() {
 
+	
 	// wipe the screen to the background colour
 	clearScreen();
 
@@ -134,7 +142,7 @@ void Application2D::draw() {
 	//m_2dRenderer->drawSprite(m_tankTexture, 0, 0, m_tankX, m_tankY, m_tankR, 1);
 	
 	m_2dRenderer->setUVRect(0, 0, 1, 1);
-	m_2dRenderer->drawSpriteTransformed3x3(m_tankBATexture, m_tankMatrix.m, 0, 0, 0, -5, -2);
+	m_2dRenderer->drawSpriteTransformed3x3(m_tankTexture, m_tankMatrix.m);
 	
 
 	//m_tankMatrix.m[6] = m_tankX;
@@ -145,9 +153,17 @@ void Application2D::draw() {
 
 	// output some text, uses the last used colour
 	char fps[32];
-	char TankT[32];
+	char TankX[32];
+	char TankY[32];
+	char TankZ[32];
 	sprintf_s(fps, 32, "FPS: %i", getFPS());
+	sprintf_s(TankX, 32, "X: %f", m_tankMatrix.m31);
+	sprintf_s(TankY, 32, "Y: %f", m_tankMatrix.m32);
+	sprintf_s(TankZ, 32, "Z: %f", m_tankMatrix.m33);
 	m_2dRenderer->drawText(m_font, fps, 0, 720 - 32);
+	m_2dRenderer->drawText(m_font, TankX, 0, 720 - 64);
+	m_2dRenderer->drawText(m_font, TankY, 0, 720 - 96);
+	m_2dRenderer->drawText(m_font, TankZ, 0, 720 - 128);
 	
 	// done drawing sprites
 	

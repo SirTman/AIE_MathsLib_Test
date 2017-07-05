@@ -36,6 +36,8 @@ protected:
 	aie::Texture*		m_tankBATexture;
 	Matrix3<float>      m_tankMatrix;
 
+	float m_tankspeed;
+
 	float m_cameraX, m_cameraY;
 	float m_tankX, m_tankY, m_tankR;
 	float m_timer;
